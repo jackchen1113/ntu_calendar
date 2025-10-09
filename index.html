@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣大學行事曆</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f9fafb;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .calendar {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-icon {
+            background: transparent;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .month-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .month-nav h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 0.5rem;
+        }
+        
+        .day-cell {
+            aspect-ratio: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .day-cell:hover {
+            background-color: #dbeafe;
+        }
+        
+        .day-cell.other-month {
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+        
+        .day-cell.today {
+            background-color: #dbeafe;
+            border-color: #2563eb;
+        }
+        
+        .day-cell .date {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .event-dots {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+        }
+        
+        .event-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #2563eb;
+            border-radius: 50%;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 28rem;
+            width: 100%;
+            margin: 1rem;
+            padding: 1.5rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            color: #6b7280;
+        }
+        
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .event-item {
+            border-left: 4px solid #2563eb;
+            padding-left: 1rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            background-color: #dbeafe;
+            border-radius: 0.25rem;
+        }
+        
+        .event-item h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .event-item p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .no-events {
+            text-align: center;
+            color: #9ca3af;
+            padding: 2rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Calendar Component -->
+        <div class="calendar" id="calendarApp">
+            <!-- CalendarHeader -->
+            <div class="header">
+                <h1>台灣大學行事曆</h1>
+                <button class="btn btn-primary" onclick="app.goToToday()">今天</button>
+            </div>
+            
+            <div class="month-nav">
+                <button class="btn btn-icon" onclick="app.previousMonth()">
+                    ◀
+                </button>
+                
+                <h2 id="currentMonthYear"></h2>
+                
+                <button class="btn btn-icon" onclick="app.nextMonth()">
+                    ▶
+                </button>
+            </div>
+            
+            <!-- CalendarGrid -->
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Content will be generated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- EventModal -->
+        <div class="modal" id="eventModal" onclick="app.closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3 id="modalDate"></h3>
+                    <button class="close-btn" onclick="app.closeModal()">×</button>
+                </div>
+                
+                <div id="eventList" class="event-list">
+                    <!-- Events will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simple date utilities (replacing Day.js)
+        const DateUtils = {
+            format(date, format) {
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                
+                if (format === 'YYYY-MM-DD') {
+                    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                } else if (format === 'YYYY年 M月') {
+                    return `${year}年 ${month}月`;
+                } else if (format === 'YYYY年 M月 D日') {
+                    return `${year}年 ${month}月 ${day}日`;
+                }
+                return date.toString();
+            },
+            
+            startOfMonth(date) {
+                return new Date(date.getFullYear(), date.getMonth(), 1);
+            },
+            
+            endOfMonth(date) {
+                return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            },
+            
+            startOfWeek(date) {
+                const day = date.getDay();
+                const diff = date.getDate() - day;
+                return new Date(date.getFullYear(), date.getMonth(), diff);
+            },
+            
+            endOfWeek(date) {
+                const day = date.getDay();
+                const diff = date.getDate() + (6 - day);
+                return new Date(date.getFullYear(), date.getMonth(), diff);
+            },
+            
+            isSameDay(date1, date2) {
+                return date1.getFullYear() === date2.getFullYear() &&
+                       date1.getMonth() === date2.getMonth() &&
+                       date1.getDate() === date2.getDate();
+            },
+            
+            addDays(date, days) {
+                const result = new Date(date);
+                result.setDate(result.getDate() + days);
+                return result;
+            },
+            
+            addMonths(date, months) {
+                const result = new Date(date);
+                result.setMonth(result.getMonth() + months);
+                return result;
+            }
+        };
+        
+        // Calendar application
+        const app = {
+            currentDate: new Date(),
+            events: [],
+            
+            async init() {
+                await this.loadEvents();
+                this.render();
+            },
+            
+            async loadEvents() {
+                try {
+                    const response = await fetch('events.json');
+                    this.events = await response.json();
+                } catch (error) {
+                    console.error('Failed to load events:', error);
+                    this.events = [];
+                }
+            },
+            
+            generateCalendarDays() {
+                const startOfMonth = DateUtils.startOfMonth(this.currentDate);
+                const endOfMonth = DateUtils.endOfMonth(this.currentDate);
+                const startDate = DateUtils.startOfWeek(startOfMonth);
+                const endDate = DateUtils.endOfWeek(endOfMonth);
+                
+                const days = [];
+                let current = new Date(startDate);
+                
+                while (current <= endDate) {
+                    const dateStr = DateUtils.format(current, 'YYYY-MM-DD');
+                    const dayEvents = this.events.filter(event => event.date === dateStr);
+                    
+                    days.push({
+                        date: current.getDate(),
+                        fullDate: dateStr,
+                        dateObj: new Date(current),
+                        isCurrentMonth: current.getMonth() === this.currentDate.getMonth(),
+                        isToday: DateUtils.isSameDay(current, new Date()),
+                        hasEvents: dayEvents.length > 0,
+                        events: dayEvents
+                    });
+                    
+                    current = DateUtils.addDays(current, 1);
+                }
+                
+                return days;
+            },
+            
+            render() {
+                // Update month year display
+                document.getElementById('currentMonthYear').textContent = 
+                    DateUtils.format(this.currentDate, 'YYYY年 M月');
+                
+                // Generate calendar grid
+                const grid = document.getElementById('calendarGrid');
+                grid.innerHTML = '';
+                
+                // Add weekday headers
+                const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+                weekDays.forEach(day => {
+                    const weekdayEl = document.createElement('div');
+                    weekdayEl.className = 'weekday';
+                    weekdayEl.textContent = day;
+                    grid.appendChild(weekdayEl);
+                });
+                
+                // Add day cells
+                const days = this.generateCalendarDays();
+                days.forEach(day => {
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell';
+                    
+                    if (!day.isCurrentMonth) {
+                        cell.classList.add('other-month');
+                    }
+                    if (day.isToday) {
+                        cell.classList.add('today');
+                    }
+                    
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'date';
+                    dateSpan.textContent = day.date;
+                    cell.appendChild(dateSpan);
+                    
+                    if (day.hasEvents) {
+                        const dots = document.createElement('div');
+                        dots.className = 'event-dots';
+                        const eventCount = Math.min(day.events.length, 3);
+                        for (let i = 0; i < eventCount; i++) {
+                            const dot = document.createElement('div');
+                            dot.className = 'event-dot';
+                            dots.appendChild(dot);
+                        }
+                        cell.appendChild(dots);
+                    }
+                    
+                    cell.addEventListener('click', () => this.openEventModal(day));
+                    grid.appendChild(cell);
+                });
+            },
+            
+            previousMonth() {
+                this.currentDate = DateUtils.addMonths(this.currentDate, -1);
+                this.render();
+            },
+            
+            nextMonth() {
+                this.currentDate = DateUtils.addMonths(this.currentDate, 1);
+                this.render();
+            },
+            
+            goToToday() {
+                this.currentDate = new Date();
+                this.render();
+            },
+            
+            openEventModal(day) {
+                if (!day.isCurrentMonth) return;
+                
+                const modal = document.getElementById('eventModal');
+                const modalDate = document.getElementById('modalDate');
+                const eventList = document.getElementById('eventList');
+                
+                modalDate.textContent = DateUtils.format(day.dateObj, 'YYYY年 M月 D日');
+                
+                eventList.innerHTML = '';
+                
+                if (day.events.length > 0) {
+                    day.events.forEach(event => {
+                        const eventItem = document.createElement('div');
+                        eventItem.className = 'event-item';
+                        
+                        const title = document.createElement('h4');
+                        title.textContent = event.title;
+                        eventItem.appendChild(title);
+                        
+                        const description = document.createElement('p');
+                        description.textContent = event.description;
+                        eventItem.appendChild(description);
+                        
+                        eventList.appendChild(eventItem);
+                    });
+                } else {
+                    const noEvents = document.createElement('div');
+                    noEvents.className = 'no-events';
+                    noEvents.textContent = '此日期沒有事件';
+                    eventList.appendChild(noEvents);
+                }
+                
+                modal.classList.add('show');
+            },
+            
+            closeModal(event) {
+                if (!event || event.target.id === 'eventModal' || event.target.classList.contains('close-btn')) {
+                    document.getElementById('eventModal').classList.remove('show');
+                }
+            }
+        };
+        
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => app.init());
+        } else {
+            app.init();
+        }
+    </script>
+</body>
+</html>
