@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>純 HTML 月曆（Day.js 範例）</title>
+    <title>帝國大學行事曆</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
@@ -43,12 +43,8 @@
                         <template x-for="day in days" :key="day.format('YYYY-MM-DD')">
                             <div class="relative p-2 rounded-lg h-12 cursor-pointer transition hover:bg-slate-700"
                                 :class="{ 'opacity-40': day.month() !== viewDate.month(), 'ring-2 ring-blue-500 bg-slate-700': day.isSame(dayjs(), 'day') }"
-                                x-on:click="alert('你點選：' + day.format('YYYY-MM-DD'))">
+                                x-on:click="getDayActivity(day.format('YYYY-MM-DD'))">
                                 <div class="absolute top-2 right-2 text-xs font-bold" x-text="day.date()"></div>
-                                <template x-for="e in Events.filter(ev => ev.date === day.format('YYYY-MM-DD'))"
-                                    :key="e.id">
-                                    <div class="text-xs bg-blue-600 rounded px-1 mt-5 truncate" x-text="e.title"></div>
-                                </template>
                             </div>
                         </template>
                     </div>
@@ -60,16 +56,16 @@
             <div class="m-1">
                 <div class="w-full max-w-4xl bg-slate-800 rounded-2xl shadow-xl p-6">
                     <div>
-                        <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
-                            x-on:click="prevMonth">本月活動</button>
-                            <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
-                            x-on:click="prevMonth">本日活動</button>
+                        <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600" 
+                            x-on:click=" getDayActivity(viewDate.format('YYYY-MM-DD'))">本日活動</button>
+                            <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600" 
+                            x-on:click=" getMonthActivity(viewDate.format('YYYY-MM-DD'))">本月活動</button>
                     </div>
                     <ul>
-                        <template x-for="item in Events" :key="item.id">
-                            <li class="border-b border-slate-300 p-1 text-slate-200">
-                                <span class="font-bold" x-text="item.date"></span> -
-                                <span x-text="item.title"></span>
+                        <template x-for="item in Events" >
+                            <li class="border-b border-slate-300 p-1 text-slate-200 cursor-pointer" x-on:click="getActivityDetail(item)">
+                                <span class="font-bold" x-text="item.Date"></span> -
+                                <span x-text="item.Event"></span>
                             </li>
                         </template>
                     </ul>
