@@ -26,11 +26,11 @@
                             </p>
                         </div>
                         <div class="space-x-2">
-                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600"
+                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
                                 x-on:click="prevMonth">‹上個月</button>
-                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600"
+                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
                                 x-on:click="today">今天</button>
-                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600"
+                            <button class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
                                 x-on:click="nextMonth">下個月›</button>
                         </div>
                     </div>
@@ -39,10 +39,16 @@
                             <div class="py-2" x-text="w"></div>
                         </template>
                     </div>
+                    <!-- 設定網格，每行最多七格-->
                     <div class="grid grid-cols-7 gap-2">
+                        <!--x-for是依照days陣列中的每個日期開始生成格子，
+                        x-bind:class是動態綁定class、
+                        'opacity-40': day.month() !== viewDate.month()將非本月日期變暗
+                        'ring-2 ring-blue-500 bg-slate-700': day.isSame(dayjs(), 'day')將今日日期加上藍色邊框和背景色
+                         -->
                         <template x-for="day in days" :key="day.format('YYYY-MM-DD')">
                             <div class="relative p-2 rounded-lg h-12 cursor-pointer transition hover:bg-slate-700"
-                                :class="{ 'opacity-40': day.month() !== viewDate.month(), 'ring-2 ring-blue-500 bg-slate-700': day.isSame(dayjs(), 'day') }"
+                                x-bind:class="{ 'opacity-40': day.month() !== viewDate.month(), 'ring-2 ring-blue-500 bg-slate-700': day.isSame(dayjs(), 'day') }"
                                 x-on:click="getDayActivity(day.format('YYYY-MM-DD'))">
                                 <div class="absolute top-2 right-2 text-xs font-bold" x-text="day.date()"></div>
                             </div>
@@ -56,19 +62,54 @@
             <div class="m-1">
                 <div class="w-full max-w-4xl bg-slate-800 rounded-2xl shadow-xl p-6">
                     <div>
-                        <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600" 
-                            x-on:click=" getDayActivity(viewDate.format('YYYY-MM-DD'))">本日活動</button>
-                            <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600" 
+                        <!-- <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600" 
+                            x-on:click=" getDayActivity(viewDate.format('YYYY-MM-DD'))">本日活動</button> -->
+                        <button class="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600 cursor-pointer"
                             x-on:click=" getMonthActivity(viewDate.format('YYYY-MM-DD'))">本月活動</button>
                     </div>
                     <ul>
-                        <template x-for="item in Events" >
-                            <li class="border-b border-slate-300 p-1 text-slate-200 cursor-pointer" x-on:click="getActivityDetail(item)">
+                        <template x-for="item in Events">
+                            <li class="border-b border-slate-300 p-1 text-slate-200 cursor-pointer"
+                                x-on:click="getActivityDetail(item)">
                                 <span class="font-bold" x-text="item.Date"></span> -
                                 <span x-text="item.Event"></span>
                             </li>
                         </template>
                     </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <!-- x-transition是設定Modal動畫、x-on:click.away是點擊外部Modal也會關閉 -->
+        <div class="fixed inset-0  flex items-center justify-center" x-show="Modal_ActivityDetail"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-1/2 font-black"
+                x-on:click.away="Modal_ActivityDetail = false">
+                <div class="flex justify-between">
+                    <div class="w-1/2">
+                        <h2 class="text-xl font-bold mb-4" x-text="EventsDetail.Event"></h2>
+                        <p class="mb-2"><strong>時間:</strong> <span x-text="EventsDetail.Time"></span></p>
+                        <p class="mb-2"><strong>地點:</strong> <span x-text="EventsDetail.Venue"></span></p>
+                        <p class="mb-2"><strong>主辦單位:</strong> <span x-text="EventsDetail.Organizer"></span></p>
+                        <p class="mb-2"><strong>聯絡電話:</strong> <span x-text="EventsDetail.Contact"></span></p>
+                        <p class="mb-2"><strong>活動連結:</strong> <a x-bind:href="EventsDetail.Url"
+                                x-text="EventsDetail.Url" target="_blank"></a></p>
+                        <p class="mb-2"><strong>活動分類:</strong> <span x-text="EventsDetail.Description"></span></p>
+                    </div>
+                    <div class="w-1/2">
+                        <p class="mb-2">
+                            <img x-bind:src="EventsDetail.Img_Url" alt="活動圖片" class="w-[375px] h-[300px] object-cover">
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="text-right">
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        x-on:click="Modal_ActivityDetail = false">關閉</button>
                 </div>
             </div>
         </div>
