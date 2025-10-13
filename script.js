@@ -42,14 +42,14 @@ document.addEventListener('alpine:init', () => {
         //創造月曆陣列
         renderDays() {
             //一週的第一天是禮拜天(切換成台灣)
-            dayjs.locale('zh-tw', {
-                weekStart: 0
-            });
+            //dayjs.locale('zh-tw', {
+            //    weekStart: 0
+            //});
             //如果要切換成禮拜一開始，改成1
             //dayjs.locale('zh-tw', {
             //    weekStart: 1
             //});
-            this.getMonthActivity();
+            //this.getMonthActivity();
             //取得本月第一天
             const startOfMonth = this.viewDate.startOf('month');//取得本月第一天
             const startCalendar = startOfMonth.startOf('week');//取得日曆的開始日期(本月第一天的禮拜天)
