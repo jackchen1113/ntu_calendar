@@ -49,7 +49,7 @@ document.addEventListener('alpine:init', () => {
             //dayjs.locale('zh-tw', {
             //    weekStart: 1
             //});
-            //this.getMonthActivity();
+            this.getMonthActivity();
             //取得本月第一天
             const startOfMonth = this.viewDate.startOf('month');//取得本月第一天
             const startCalendar = startOfMonth.startOf('week');//取得日曆的開始日期(本月第一天的禮拜天)
